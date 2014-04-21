@@ -1,0 +1,73 @@
+@font-face {
+	font-family: 'utils';
+	src:url('fonts/utils.eot?-726zuv');
+	src:url('fonts/utils.eot?#iefix-726zuv') format('embedded-opentype'),
+		url('fonts/utils.woff?-726zuv') format('woff'),
+		url('fonts/utils.ttf?-726zuv') format('truetype'),
+		url('fonts/utils.svg?-726zuv#utils') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="utils-"], [class*=" utils-"] {
+	font-family: 'utils';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.utils-tags:before {
+	content: "\e600";
+}
+.utils-location:before {
+	content: "\e601";
+}
+.utils-history:before {
+	content: "\e60a";
+}
+.utils-clock:before {
+	content: "\e60b";
+}
+.utils-calendar:before {
+	content: "\e602";
+}
+.utils-laptop:before {
+	content: "\e60c";
+}
+.utils-equalizer:before {
+	content: "\e603";
+}
+.utils-cog:before {
+	content: "\e604";
+}
+.utils-stats:before {
+	content: "\e605";
+}
+.utils-remove:before {
+	content: "\e606";
+}
+.utils-switch:before {
+	content: "\e609";
+}
+.utils-download:before {
+	content: "\e607";
+}
+.utils-upload:before {
+	content: "\e608";
+}
+.utils-info:before {
+	content: "\e60d";
+}
+.utils-radio-checked:before {
+	content: "\e60e";
+}
+.utils-radio-unchecked:before {
+	content: "\e60f";
+}

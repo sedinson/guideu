@@ -1,0 +1,82 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 16/02/2014, 10:15:35 PM
+    Author     : edinson
+*/
+* {
+    font-size: 14px;
+}
+
+.no-margin-center {
+    text-align: center;
+    margin: 0;
+}
+.subtitle {
+    font-weight: bold!important;
+    font-size: 1.0em!important;
+    clear: both;
+}
+.letitbigger {
+    font-size: 1.4em;
+}
+.full {
+    display: block;
+    width: 100%;
+}
+.half {
+    position: relative;
+    float: left;
+    display: block;
+    font-size: 1.0em;
+    text-align: center;
+    width: 50%;
+}
+.overflow {
+    overflow: auto;
+}
+.days .ui-grid-a>.ui-block-a, .days .ui-grid-a>.ui-block-b {
+    width: 14.2%!important;
+}
+.days .ui-block-a {
+    clear: none!important;
+}
+form.overflow .half:nth-of-type(1) {
+    width: 80%;
+}
+form.overflow .half:nth-of-type(2) {
+    width: 20%;
+}
+.subbuttons {
+    text-align: center; 
+    margin-top: 10px;
+}
+.letitbigger i, .letitbigger b {
+    font-size: 1em;
+}
+
+#machine-name {
+    font-size: 2.0em;
+}
+#hour-refresh {
+    font-size: 1.7em;
+}
+#date-refresh {
+    font-size: 1.0em;
+}
+
+#grafica {
+    position: absolute;
+    width: 95%;
+    height: 90%;
+}
+
+#no-machines-message, #valuables {
+    display: none;
+}
+#no-machines-message h2 {
+    font-size: 2.0em;
+}

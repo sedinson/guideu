@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<widget xmlns   = "http://www.w3.org/ns/widgets"
+    xmlns:gap   = "http://phonegap.com/ns/1.0"
+    id          = "com.phonegap.energyware"
+    versionCode = "10" 
+    version     = "1.0.0" >
+    <name>energyware</name>
+    <description>Cordova Application</description>
+    <author email="edinsonsalas@gmail.com" href="https://build.phonegap.com">edinson salas</author>
+    <access origin="*"/>
+    <preference name="webviewbounce" value="true"/>
+    <preference name="orientation" value="portrait" />
+    
+    <gap:plugin name="org.apache.cordova.device" version="0.2.8" />
+    <gap:plugin name="org.apache.cordova.dialogs" version="0.2.6" />
+</widget>
