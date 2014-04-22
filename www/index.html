@@ -30,92 +30,283 @@ and open the template in the editor.
             <div data-role="content">
                 <div id="map-canvas"></div>
             </div>
-
+            
             <div data-role="footer" data-theme="b" data-position="fixed">
-                <fieldset class="ui-grid-c">
-                    <button onclick="javascript: Pages.places();" class="ui-block-a btn-footer ui-btn ui-icon-location ui-btn-icon-top">Places</button>
-                    <button onclick="javascript: Pages.danger();" class="ui-block-b btn-footer ui-btn ui-icon-alert ui-btn-icon-top">Be Careful!</button>
-                    <button class="ui-block-c btn-footer ui-btn ui-icon-navigation ui-btn-icon-top">Transport</button>
-                    <button class="ui-block-d btn-footer ui-btn ui-icon-plus ui-btn-icon-top">Information</button>
-                </fieldset>
+                <div data-role="navbar">
+                    <ul>
+                        <li><a href="javascript:Pages.places.list();" data-icon="location">Places</a></li>
+                        <li><a href="javascript:Pages.danger.show();" data-icon="alert" class="ui-btn-active">Be Careful!</a></li>
+                        <li><a href="javascript:Pages.transport.list();" data-icon="navigation">Transport</a></li>
+                        <li><a href="javascript:Pages.information.list();" data-icon="info">News</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
         
-        <div data-role="page" id="places">
+        <div data-role="page" data-dialog="true" id="dialog-places">
+            <div data-role="header" data-theme="b" data-position="fixed">
+                <h1 id="name-place"></h1>
+            </div>
+
+            <div data-role="content" class="ui-content">
+                <img id="img-place" src="" />
+                <p><b>Punctuation: </b> <span id="punctuation-place"></span>/5</p>
+                <div id="description-place"></div>
+            </div>
+        </div>
+        
+        <div data-role="page" id="page-blank">
+            <div data-role="header" data-theme="b" data-position="fixed">
+                <a href="#" data-rel="back" data-iconpos="notext" data-role="button" data-icon="home">Home</a>
+                <h1 id="page-blank-title"></h1>
+            </div>
+
+            <div data-role="content" class="ui-content" id="page-blank-content">
+            </div>
+        </div>
+        
+        <div data-role="page" id="page-list">
             <div data-role="header" data-position="fixed">
-                <a href="#" data-rel="back" data-iconpos="notext" data-role="button" data-icon="arrow-l">Regresar</a>
-                <h1>Places</h1>
+                <a href="#" data-rel="back" data-iconpos="notext" data-role="button" data-icon="arrow-l">Back</a>
+                <h1 id="page-list-title"></h1>
             </div>
             
             <div data-role="content">
-                <ul data-role="listview" data-inset="true" id="list-places"></ul>
+                <ul data-role="listview" data-inset="true" data-filter="true" id="page-list-ul"></ul>
             </div>
         </div>
 
         <script type="text/javascript">
+            var show_danger_zones = true;
+            
             var Pages = {
                 map: function () {
                     $.mobile.changePage('#map');
                 },
-                places: function () {
-                    $.mobile.changePage('#places');
-                    //$('#dialog-filter').popup( "open" );
-                    var list = $("#list-places");
-                    list.html("");
-                    for(var i=0; i<info.places.length; i++) {
-                        var place = info.places[i];
-                        list.append(
-                            $("<li/>").append(
-                                $("<a/>", {
-                                    href: 'javascript:Pages.points(' + i + ')',
-                                    html: place.name
+                
+                places: {
+                    list: function () {
+                        $.mobile.changePage('#page-list');
+                        $("#page-list-title").html('Places');
+                        var list = $("#page-list-ul");
+                        list.html("");
+                        for(var i=0; i<info.places.length; i++) {
+                            var place = info.places[i];
+                            list.append(
+                                $("<li/>").append(
+                                    $("<a/>", {
+                                        href: 'javascript:Pages.places.points(' + i + ')',
+                                        html: place.name
+                                    })
+                                )
+                            );
+                        }
+
+                        list.listview( "refresh" );
+                    },
+                    points: function (i) {
+                        var places = info.places[i].markers,
+                            points = info.markers.points;
+
+                        for(var j=0; j<points.length; j++) {
+                            points[j].setMap(null);
+                        }
+
+                        points.length = 0;
+
+                        for(var j=0; j<places.length; j++) {
+                            var m = new google.maps.Marker({
+                                position: places[j].latlng,
+                                animation: google.maps.Animation.DROP,
+                                map: map,
+                                title: places[j].name
+                            });
+
+                            points.push(m);
+
+                            (function (_i, _j, _m) {
+                                google.maps.event.addListener(_m, 'click', function () {
+                                    Pages.places.description.show(_i, _j);
+                                });
+                            })(i, j, m);
+                        }
+
+                        Pages.map();
+                    },
+                    description: {
+                        show: function (i, j) {
+                            var place = info.places[i].markers[j];
+                            $("#description-place").html(place.description);
+                            $("#punctuation-place").html(place.punctuation);
+                            $("#img-place").attr('src', place.image);
+                            $("#name-place").html(place.name);
+                            
+                            $.mobile.changePage('#dialog-places');
+                        }
+                    }
+                },
+                
+                danger: {
+                    show: function () {
+                        var shapes = info.danger;
+                        for(var i=0; i<info.shapes.length; i++) {
+                            info.shapes[i].setMap(null);
+                        }
+
+                        info.shapes.length = 0;
+
+                        if(show_danger_zones) {
+                            for(var i=0; i<shapes.length; i++) {
+                                var circle = new google.maps.Circle({
+                                    strokeColor: '#FF0000',
+                                    strokeOpacity: 0.8,
+                                    strokeWeight: 2,
+                                    fillColor: '#FF0000',
+                                    fillOpacity: shapes[i].punctuation/5,
+                                    map: map,
+                                    center: shapes[i].latlng,
+                                    radius: shapes[i].radius
+                                });
+                                
+                                info.shapes.push(circle);
+                        
+                                (function (_i, _c) {
+                                    google.maps.event.addListener(_c, 'click', function () {
+                                        Pages.danger.overview(_i);
+                                    });
+                                })(i, circle);
+                            }
+                        }
+
+                        show_danger_zones = !show_danger_zones;
+                    }, overview: function (i) {
+                        var danger = info.danger[i];
+                        $("#description-place").html(danger.description);
+                        $("#punctuation-place").html(danger.punctuation);
+                        $("#img-place").attr('src', danger.image);
+                        $("#name-place").html(danger.name);
+
+                        $.mobile.changePage('#dialog-places');
+                    }
+                },
+                
+                transport: {
+                    list: function () {
+                        $.mobile.changePage('#page-list');
+                        $("#page-list-title").html('Transport');
+                        var list = $("#page-list-ul");
+                        list.html("");
+                        for(var i=0; i<info.routes.length; i++) {
+                            var route = info.routes[i];
+                            list.append(
+                                $("<li/>").append(
+                                    $("<a/>", {
+                                        href: 'javascript:Pages.transport.points(' + i + ')',
+                                        html: route.name
+                                    })
+                                )
+                            );
+                        }
+
+                        list.listview( "refresh" );
+                    },
+                    points: function (i) {
+                        var route = info.routes[i].route;
+
+                        if(info.markers.route) {
+                            info.markers.route.setMap(null);
+                            info.markers.route = null;
+                        }
+                        
+                        info.markers.route = new google.maps.Polyline({
+                            path: route,
+                            geodesic: true,
+                            strokeColor: '#05c401',
+                            strokeOpacity: 1.0,
+                            strokeWeight: 5,
+                            map: map
+                        });
+
+                        Pages.map();
+                    }
+                },
+                
+                information: {
+                    list: function () {
+                        $.mobile.changePage('#page-list');
+                        $("#page-list-title").html('News Information');
+                        var list = $("#page-list-ul");
+                        list.html("");
+                        for(var i=0; i<info.information.length; i++) {
+                            var news = info.information[i];
+                            list.append(
+                                $("<li/>").append(
+                                    $("<a/>", {
+                                        href: 'javascript:Pages.information.view(' + i + ')'
+                                    }).append(
+                                        $("<img/>", {
+                                            src: news.image
+                                        })
+                                    ).append(
+                                        $("<h2/>", {
+                                            html: news.title
+                                        })
+                                    ).append(
+                                        $("<p/>", {
+                                            text: news.abbr
+                                        })
+                                    )
+                                )
+                            );
+                        }
+
+                        list.listview( "refresh" );
+                    },
+                    view: function (i) {
+                        var news = info.information[i];
+                        
+                        $.mobile.changePage('#page-blank');
+                        $("#page-blank-title").html(news.title);
+                        
+                        $("#page-blank-content").html("");
+                        
+                        $("#page-blank-content").append(
+                            $("<div/>", {
+                                class: 'news_wrapper'
+                            }).append(
+                                $("<img/>", {
+                                    class: 'news_image',
+                                    src: news.image
+                                })
+                            ).append(
+                                $("<h2/>", {
+                                    class: 'news_title',
+                                    html: news.title
                                 })
                             )
-                        );
-                    }
-                    
-                    list.listview( "refresh" );
-                },
-                points: function (i) {
-                    var places = info.places[i].markers,
-                        points = info.markers.points;
-                
-                    for(var i=0; i<points.length; i++) {
-                        points[i].setMap(null);
-                    }
-                    
-                    points.length = 0;
-                    
-                    for(var i=0; i<places.length; i++) {
-                        points.push(new google.maps.Marker({
-                            position: places[i].latlng,
-                            animation: google.maps.Animation.DROP,
-                            map: map,
-                            title: places[i].name
-                        }));
-                    }
-                    
-                    Pages.map();
-                },
-                danger: function () {
-                    var shapes = info.danger;
-                    for(var i=0; i<info.shapes.length; i++) {
-                        info.shapes[i].setMap(null);
-                    }
-                    
-                    info.shapes.length = 0;
-                    
-                    for(var i=0; i<shapes.length; i++) {
-                        info.shapes.push(
-                            new google.maps.Circle({
-                                strokeColor: '#FF0000',
-                                strokeOpacity: 0.8,
-                                strokeWeight: 2,
-                                fillColor: '#FF0000',
-                                fillOpacity: shapes[i].opacity,
-                                map: map,
-                                center: shapes[i].latlng,
-                                radius: shapes[i].radius
+                        ).append(
+                            $("<div/>", {
+                                class: 'news_roughe'
+                            }).append(
+                                $("<p/>", {
+                                    class: 'news_author',
+                                    html: news.author
+                                })
+                            ).append(
+                                $("<p/>", {
+                                    class: 'news_date',
+                                    html: news.date
+                                })
+                            )
+                        ).append(
+                            $("<p/>", {
+                                class: 'news_abbr',
+                                html: news.abbr
+                            })
+                        ).append(
+                            $("<div/>", {
+                                class: 'news_desc',
+                                html: news.news
                             })
                         );
                     }
@@ -132,6 +323,7 @@ and open the template in the editor.
                     zoomControl: true,
                     zoom: 12,
                     zoomControlOptions: {
+                        position: google.maps.ControlPosition.LEFT_CENTER,
                         style: google.maps.ZoomControlStyle.SMALL
                     }
                 };
