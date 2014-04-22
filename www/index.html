@@ -6,11 +6,166 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GuideU</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="res/jquery-mobile.min.css" />
+        <link rel="stylesheet" href="res/style.css" />
+        <link rel="stylesheet" href="res/utils.css" />
+
+        <!--Cordova library and plugins
+        <script type="text/javascript" src="cordova.js"></script>-->
+
+        <!--Another libraries-->
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+        <script type="text/javascript" src="libs/js/jquery.min.js"></script>
+        <script type="text/javascript" src="libs/js/jquery-mobile.min.js"></script>
+        <script type="text/javascript" src="libs/js/highcharts.js"></script>
+        <script type="text/javascript" src="libs/js/highcharts-more.js"></script>
+        <script type="text/javascript" src="libs/js/projectbase.js"></script>
+        <script type="text/javascript" src="libs/data/information.js"></script>
     </head>
     <body>
-        <div>TODO write content</div>
+        <div data-role="page" id="map">
+            <div data-role="content">
+                <div id="map-canvas"></div>
+            </div>
+
+            <div data-role="footer" data-theme="b" data-position="fixed">
+                <fieldset class="ui-grid-c">
+                    <button onclick="javascript: Pages.places();" class="ui-block-a btn-footer ui-btn ui-icon-location ui-btn-icon-top">Places</button>
+                    <button onclick="javascript: Pages.danger();" class="ui-block-b btn-footer ui-btn ui-icon-alert ui-btn-icon-top">Be Careful!</button>
+                    <button class="ui-block-c btn-footer ui-btn ui-icon-navigation ui-btn-icon-top">Transport</button>
+                    <button class="ui-block-d btn-footer ui-btn ui-icon-plus ui-btn-icon-top">Information</button>
+                </fieldset>
+            </div>
+        </div>
+        
+        <div data-role="page" id="places">
+            <div data-role="header" data-position="fixed">
+                <a href="#" data-rel="back" data-iconpos="notext" data-role="button" data-icon="arrow-l">Regresar</a>
+                <h1>Places</h1>
+            </div>
+            
+            <div data-role="content">
+                <ul data-role="listview" data-inset="true" id="list-places"></ul>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var Pages = {
+                map: function () {
+                    $.mobile.changePage('#map');
+                },
+                places: function () {
+                    $.mobile.changePage('#places');
+                    //$('#dialog-filter').popup( "open" );
+                    var list = $("#list-places");
+                    list.html("");
+                    for(var i=0; i<info.places.length; i++) {
+                        var place = info.places[i];
+                        list.append(
+                            $("<li/>").append(
+                                $("<a/>", {
+                                    href: 'javascript:Pages.points(' + i + ')',
+                                    html: place.name
+                                })
+                            )
+                        );
+                    }
+                    
+                    list.listview( "refresh" );
+                },
+                points: function (i) {
+                    var places = info.places[i].markers,
+                        points = info.markers.points;
+                
+                    for(var i=0; i<points.length; i++) {
+                        points[i].setMap(null);
+                    }
+                    
+                    points.length = 0;
+                    
+                    for(var i=0; i<places.length; i++) {
+                        points.push(new google.maps.Marker({
+                            position: places[i].latlng,
+                            animation: google.maps.Animation.DROP,
+                            map: map,
+                            title: places[i].name
+                        }));
+                    }
+                    
+                    Pages.map();
+                },
+                danger: function () {
+                    var shapes = info.danger;
+                    for(var i=0; i<info.shapes.length; i++) {
+                        info.shapes[i].setMap(null);
+                    }
+                    
+                    info.shapes.length = 0;
+                    
+                    for(var i=0; i<shapes.length; i++) {
+                        info.shapes.push(
+                            new google.maps.Circle({
+                                strokeColor: '#FF0000',
+                                strokeOpacity: 0.8,
+                                strokeWeight: 2,
+                                fillColor: '#FF0000',
+                                fillOpacity: shapes[i].opacity,
+                                map: map,
+                                center: shapes[i].latlng,
+                                radius: shapes[i].radius
+                            })
+                        );
+                    }
+                }
+            };
+            
+            
+            //Generate the map
+            function initialize() {
+                var mapOptions = {
+                    center: new google.maps.LatLng(10.9639, -74.7964),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    zoom: 12,
+                    zoomControlOptions: {
+                        style: google.maps.ZoomControlStyle.SMALL
+                    }
+                };
+
+                map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+                // Try W3C Geolocation (Preferred)
+                if (navigator.geolocation) {
+                    browserSupportFlag = true;
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var myLatlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                        
+                        map.setCenter(myLatlng);
+                        info.markers.me = new google.maps.Marker({
+                            position: myLatlng,
+                            animation: google.maps.Animation.DROP,
+                            map: map,
+                            icon: 'res/images/me.png',
+                            title: 'You are here!'
+                        });
+                    }, function() {
+                        handleNoGeolocation(browserSupportFlag);
+                    });
+                } else {
+                    browserSupportFlag = false;
+                    handleNoGeolocation(browserSupportFlag);
+                }
+
+                function handleNoGeolocation(errorFlag) {
+                    map.setCenter(new google.maps.LatLng(10.9639, -74.7964));
+                }
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
     </body>
 </html>
