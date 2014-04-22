@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <widget xmlns   = "http://www.w3.org/ns/widgets"
     xmlns:gap   = "http://phonegap.com/ns/1.0"
-    id          = "com.phonegap.energyware"
+    id          = "com.phonegap.guideu"
     versionCode = "10" 
     version     = "1.0.0" >
-    <name>energyware</name>
+    <name>GuideU</name>
     <description>Cordova Application</description>
     <author email="edinsonsalas@gmail.com" href="https://build.phonegap.com">edinson salas</author>
     <access origin="*"/>
